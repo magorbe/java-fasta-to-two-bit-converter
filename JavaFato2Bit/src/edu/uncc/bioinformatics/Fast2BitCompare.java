@@ -3,7 +3,12 @@
  * and open the template in the editor.
  */
 package edu.uncc.bioinformatics;
+/** 
+Copyright (C) 2011 Jeremy Villalobos
+This module uses CPL licensed code.  It is a separate, independent module from the 
+Fa22Bit module.  It is included for convenience.
 
+**/
 import com.affymetrix.genometryImpl.AnnotatedSeqGroup;
 import com.affymetrix.genometryImpl.BioSeq;
 import com.affymetrix.genometryImpl.SeqSpan;
