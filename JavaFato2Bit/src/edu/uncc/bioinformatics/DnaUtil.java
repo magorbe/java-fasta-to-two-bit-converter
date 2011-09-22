@@ -29,7 +29,7 @@ public class DnaUtil {
 
 	static boolean inittedNtVal = false;
 
-	static void initNtVal()
+	public static void initNtVal()
 	{
 	if (!inittedNtVal)
 	    {
@@ -117,7 +117,7 @@ public class DnaUtil {
 	 * nucleotide, and if so convert it to lower case. */
 	static char[] ntChars = new char[256];
 	static boolean initted = false;
-	static void initNtChars(){
+	public static void initNtChars(){
 		if (!initted){
 		    ntChars['a'] = ntChars['A'] = 'a';
 		    ntChars['c'] = ntChars['C'] = 'c';
