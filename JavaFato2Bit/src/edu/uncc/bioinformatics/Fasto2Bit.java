@@ -100,6 +100,7 @@ public class Fasto2Bit {
 																			, TwoBitNameTooLongException, FaFormatException, DuplicateSequenceException{
 		
 		DnaUtil.initNtChars();
+		DnaUtil.initNtVal();
 		
 		boolean noMaskFT = false;
 		boolean stripVersion = true;
