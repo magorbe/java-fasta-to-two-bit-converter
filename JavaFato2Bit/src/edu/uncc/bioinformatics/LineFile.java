@@ -33,7 +33,9 @@ public class LineFile {
 	public LineFile(String file_name) throws FileNotFoundException{
 		mFile = new File( file_name );
 		DataInputStream stream = new DataInputStream( new FileInputStream(mFile) );
-		reader = new BufferedReader( new InputStreamReader( stream ) );
+		reader = new BufferedReader( new InputStreamReader( stream ) ); //500MB buffer size.  
+		//TODO play with the buffer size, if a fast program = large buffer, leave the size as a command line option so that 
+		//the program does not crash on low memory computers.
 	}
 	public String lineFileNext() throws IOException{
 		String ans = null;

@@ -8,6 +8,7 @@ import java.util.List;
 import edu.uncc.bioinformatics.DnaSeq;
 import edu.uncc.bioinformatics.DnaUtil;
 import edu.uncc.bioinformatics.Sig;
+import java.io.BufferedOutputStream;
 
 /**
  * Two bit representation of DNA
@@ -35,6 +36,29 @@ public class TwoBit {
 	static int packedSize(int unpackedSize){
 		return ((unpackedSize + 3) >> 2);
 	}
+	
+	
+	private static int Segment;
+	//*this code is not in use
+	private static class worker extends Thread{
+		char[] ubyte;
+		char[] dna;
+		int start;
+		int end;
+		public worker( char[] u, char[] c, int s, int e){
+			ubyte = u;
+			dna = c;
+			start = s;
+			end = e;
+			//System.out.println( "start: " + start  + "div: " + start%4 + " stop: " + end  + " div: " + end%4);
+		}
+		public void run(){
+			for( int i = start; i < end; i+=4){
+				ubyte[i/4] = DnaUtil.packDna4(dna, i);
+			}
+		}
+	}
+	
 	/* Convert dnaSeq representation in memory to twoBit representation.
 	 * If doMask is true interpret lower-case letters as masked. */
 	public static TwoBit twoBitFromDnaSeq( DnaSeq seq, boolean doMask){
@@ -61,14 +85,43 @@ public class TwoBit {
 		dna = seq.getDna();
 		
 		end = dna.length - 4; //I don't know why -4
+		
+		int CPU = 4;
+		int seg = end / CPU; // 4 cores
+		
+		/**
+		 * packDna4 passes the array with a start index
+		 * and the function should return a character, which we then 
+		 * put into ubyte_pt.
+		 * 
+		 * this code did not improve anything.
+		 */
+		/*worker[] workers = new worker[CPU];
+		int rem;
+		for( int i = 0; i < CPU; i++){
+			int start = i*seg - ((i*seg) % 4 );
+			int stop = (i+1)*seg - (((i+1)*seg) % 4);
+			
+			if( i == CPU - 1){
+				workers[i]  = new worker(ubyte_pt, dna, start , end );	
+			}else{
+				workers[i]  = new worker(ubyte_pt, dna, start, stop );
+			}
+			workers[i].start();
+		}
+		for( int i = 0; i < CPU; i++){
+			try {
+				workers[i].join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}*/
+		
 		int i;
 		for ( i = 0; i<end; i += 4){
-			/**
-			 * packDna4 passes the array with a start index
-			 * and the function should return a character, which we then 
-			 * put into ubyte_pt.
-			 */
+			
 		    ubyte_pt[i/4] = DnaUtil.packDna4(dna, i);
+		    
 		}
 	
 		/* Take care of conversion of last few bases. */
@@ -243,7 +296,7 @@ public class TwoBit {
 	 * @throws IOException 
 	 * @throws TwoBitNameTooLongException 
 	 **/
-	public static void twoBitWriteHeader(List<TwoBit> twoBitList, DataOutputStream stream ) throws FileSizeExceedsTwoBitStandardException
+	public static void twoBitWriteHeader(List<TwoBit> twoBitList, BufferedOutputStream stream ) throws FileSizeExceedsTwoBitStandardException
 																			, IOException, TwoBitNameTooLongException{
 		int sig = Sig.twoBitSig;
 		int version = 0;
@@ -310,7 +363,7 @@ public class TwoBit {
 	 * @throws IOException 
 	 *  
 	 ****/
-	public static void writeString( String s, DataOutputStream stream) throws TwoBitNameTooLongException, IOException{
+	public static void writeString( String s, BufferedOutputStream stream) throws TwoBitNameTooLongException, IOException{
 		char[] in = new char[s.length()];
 		for( int i = 0; i < s.length(); i++){
 			in[i] = s.charAt( i );
@@ -342,10 +395,10 @@ public class TwoBit {
 		//so 4 * 4 = 16
 		//nStarts, nSizes, maskStarts and maskSizes each would be 4 * length
 		return packedSize( twoBit.size ) + 16 
-				+ twoBit.nStarts.length    * 4 
-				+ twoBit.nSizes.length     * 4
-				+ twoBit.maskStarts.length * 4
-				+ twoBit.maskSizes.length  * 4;
+				+ (twoBit.nStarts != null ? twoBit.nStarts.length    * 4 : 0) 
+				+ (twoBit.nSizes != null ? twoBit.nSizes.length     * 4 : 0)
+				+ (twoBit.maskStarts != null ? twoBit.maskStarts.length * 4 : 0 )
+				+ (twoBit.maskSizes != null ? twoBit.maskSizes.length  * 4 : 0 );
 		
 		//this is the original c code
 		/*return packedSize(twoBit->size) 
@@ -376,7 +429,7 @@ public class TwoBit {
 	 * @throws IOException 
 	 *
 	 **/
-	public static void twoBitWriteOne(TwoBit twoBit, DataOutputStream f) throws IOException{
+	public static void twoBitWriteOne(TwoBit twoBit, BufferedOutputStream f) throws IOException{
 		f.write( intToByteArray( twoBit.size ) );
 		//write the count for the n block count.
 		f.write( intToByteArray( twoBit.nBlockCount ));

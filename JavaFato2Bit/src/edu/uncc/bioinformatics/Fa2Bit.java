@@ -31,39 +31,70 @@ import java.util.Map;
 import edu.uncc.bioinformatics.twobit.FileSizeExceedsTwoBitStandardException;
 import edu.uncc.bioinformatics.twobit.TwoBit;
 import edu.uncc.bioinformatics.twobit.TwoBitNameTooLongException;
+import java.io.BufferedOutputStream;
 
-public class Fasto2Bit {
+public class Fa2Bit {
 
 	public static final String InputArg = "--input";
 	public static final String OutputArg = "--output";
-			
+        public static final String MaskedArg = "--no-masked";
+        public static final String ValidateArg = "--validate";
+        public static final String HelpArg = "--help";
+        public static final String LicenseArg = "--license";
+        
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if( args.length < 4 ){
+		if( args.length < 2 ){
 			System.out.println("Not enough arguments");
 			printUsage();
 			System.exit(1);
 		}
 		String[] Input = null;
 		String Output = null;
+                boolean Validate;
+                //this false does translate soft and hard masked values.
+                boolean NoMasked = false;
 		for( int i = 0 ; i < args.length ; i++){
 			if( args[i].equals(InputArg) ){
 				String input = args[++i];
 				Input = input.split("@");
 			}else if (args[i].equals(OutputArg) ){
 				Output = args[++i];
-			}
+			}else if( args[i].equals( MaskedArg)){
+                            NoMasked = true; //Boolean.parseBoolean( args[++i]);
+                        }else if( args[i].equals(ValidateArg) ){
+                            Validate = true;
+                        }else if( args[i].equals( HelpArg)){
+                            printUsage();
+                            return;
+                        }else if( args[i].equals( LicenseArg ) ) {
+                            System.out.println(license);
+                            return;
+                        }
+                        
 		}
-		if( Input == null || Output == null){
-			System.out.println("Either Input or Output are null.");
+		if( Input == null ){
+			System.out.println("Input is null.");
 			printUsage();
 			System.exit(2);
 		}
-		
+                if( Output == null){
+                    if( Input[0].endsWith(".fa")){
+                        Output = Input[0].replace(".fa", ".2bit");
+                    }else if(Input[0].endsWith( ".fasta" ) ) {
+                        Output = Input[0].replace(".fa", ".2bit");
+                    }
+                    System.out.println("Output is null... setting the output file to " + Output );
+                }
+                if( NoMasked){
+                    System.out.println("Converting masked nucleotide to proper letter");
+                }else{
+                    System.out.println("Converting masked nucleotide to n");
+                }
 		try {
-			Fastto2BitConvert( Input , Output);
+			Fastto2BitConvert( Input , Output, NoMasked);
 		} catch (FileSizeExceedsTwoBitStandardException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -76,14 +107,23 @@ public class Fasto2Bit {
 			e.printStackTrace();
 		}
 		
-		//System.out.println( "Done");
+                File out = new File( Output);
+                
+                boolean result = Fast2BitCompare.validate( Input, "file://" + out.getAbsolutePath() );
+                if( !result ){
+                    System.out.println("Test failed" );   
+                }
 		
-
 	}
 	
 	public static void printUsage(){
-		System.out.println("Fato2Bit --input fastaone.fasta@fastwo.fasta@fastan.fasta --output out.2bit ");
-		System.out.println("All the arguments are required. At [@] is a special characer.  The fasta files should not include this character in their name.");
+		System.out.println("\n\tFato2Bit --input fastaone.fasta@fastwo.fasta@fastan.fasta --output out.2bit ");
+		System.out.println("\t\t--input is required. At [@] is a special characer.  The fasta files should not include this character in their name.");
+                System.out.println("\t\t--output can be used to specify the name of the 2bit output.  Otherwise the name of the first fa file is used.");
+                System.out.println("\t\t--validate will check the fa and the 2bit files after creation.  The sequence and nucleotide position is printed if a check fails ");
+                System.out.println("\t\t\tNotice that the conversion is quiet fast without validation.");
+                System.out.println("\t\t--help prints this message. \n");
+                System.out.println("\t\t--license prints license. \n");
 	}
 	/**
 	 * Used for non-recoginized encodings.  
@@ -114,13 +154,13 @@ public class Fasto2Bit {
 	 * @throws DuplicateSequenceException 
 	 * @throws FaFormatException 
 	 **/	
-	public static void Fastto2BitConvert( String[] input, String output) throws FileSizeExceedsTwoBitStandardException, IOException
+	public static void Fastto2BitConvert( String[] input, String output, boolean no_masked) throws FileSizeExceedsTwoBitStandardException, IOException
 																			, TwoBitNameTooLongException, FaFormatException, DuplicateSequenceException{
 		
 		DnaUtil.initNtChars();
 		DnaUtil.initNtVal();
 		
-		boolean noMaskFT = false;
+		boolean noMaskFT = no_masked;
 		boolean stripVersion = true;
 		boolean ignoreDups = true;
 		//create class called twoBit
@@ -151,6 +191,7 @@ public class Fasto2Bit {
 													 //implement the lineFileOpen routine
 													 //TODO implement the lineFile class
 			DnaSeq seq = new DnaSeq(); //dnaSeq struct clone
+			System.out.println("Working on fa: " + fasta_file);
 			while( Fa.faMixedSpeedReadNext( lf, seq)){ // (faMixedSpeedReadNext(lf, &seq.dna, &seq.size, &seq.name)
 				if (seq.size() == 0)
 				{
@@ -194,7 +235,8 @@ public class Fasto2Bit {
 			revers.add( twoBitList.get( k ));
 		}
 		f = new File( output );
-		DataOutputStream stream = new DataOutputStream( new FileOutputStream( f ) );
+		
+                BufferedOutputStream stream = new BufferedOutputStream( new DataOutputStream( new FileOutputStream( f ) ));
 				//mustOpen(outFile, "wb"); //Open binary file
 		TwoBit.twoBitWriteHeader(revers, stream);
 		for( TwoBit two_bit : revers ){
@@ -209,24 +251,27 @@ public class Fasto2Bit {
 	}
 		
 
+        static CharBuffer ans = CharBuffer.allocate(10000000);
 	/* Convert non ACGT characters to N. */
 	public static CharBuffer unknownToN(CharBuffer s){
 		char c;
-		CharBuffer ans = CharBuffer.allocate(10000000);
+		ans.clear();
 		char[] dna = s.toString().toCharArray();
 		int i;
 		for (i=0; i< dna.length; ++i){
 		    c = dna[i];
+                    char m = c;
 		    if (DnaUtil.ntChars[(int)c] == 0){
 		    	if ( Character.isUpperCase(c)){
 		    		ans.put('N');
 		    	}else{
 		    		ans.put('n');
 		    	}
-			}else{
-				ans.put(c);
-			}
-	    }
+                    }else{
+                            ans.put(c);
+                    }
+                  
+                }
 		return ans;
 	}
 	
@@ -237,14 +282,32 @@ public class Fasto2Bit {
 		int i;
 		char c;
 		for (i=0; i< buff.length; ++i){
-		    if ((c = DnaUtil.ntChars[(int)buff[i]]) == 0){
+                    char m = DnaUtil.ntChars[(int)buff[i]];
+		    if ((c = m) == 0){
 		    	c = 'n';
 		    }
+                 
 		    buff[i] = c;
 	    }
 		
 		return buff;
 	}
-	
+	public static final String license = "Copyright (C) 2011  Jeremy Villalobos\n"+
+            "Bioinformatics Department, University of North Carolina Charlotte.\n"+
+            "This program is free software: you can redistribute it and/or modify\n"+
+            "it under the terms of the GNU General Public License as published by\n"+
+            "the Free Software Foundation, either version 3 of the License, or \n"+
+            "(at your option) any later version.\n"+
+            "\n"+
+            "This program is distributed in the hope that it will be useful,\n"+
+            "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"+
+            "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"+
+            "GNU General Public License for more details.\n"+
+            "\n"+
+            "You should have received a copy of the GNU General Public License\n"+
+            "along with this program.  If not, see <http://www.gnu.org/licenses/>.\n"+
+            "\n"+
+            "This program was a conversion from C languge.  The original code is from \n"+
+            "http://code.google.com/p/zinba/";
 	
 }
