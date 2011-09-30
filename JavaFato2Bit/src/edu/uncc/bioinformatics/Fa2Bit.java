@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import edu.uncc.bioinformatics.twobit.FileSizeExceedsTwoBitStandardException;
 import edu.uncc.bioinformatics.twobit.TwoBit;
 import edu.uncc.bioinformatics.twobit.TwoBitNameTooLongException;
@@ -121,6 +122,7 @@ public class Fa2Bit {
 		System.out.println("\t\t--input is required. At [@] is a special characer.  The fasta files should not include this character in their name.");
                 System.out.println("\t\t--output can be used to specify the name of the 2bit output.  Otherwise the name of the first fa file is used.");
                 System.out.println("\t\t--validate will check the fa and the 2bit files after creation.  The sequence and nucleotide position is printed if a check fails ");
+                System.out.println("\t\t--no-masked : lower case nucleotide letters will be interpreted as n. instead of their respective nucleotide value.");
                 System.out.println("\t\t\tNotice that the conversion is quiet fast without validation.");
                 System.out.println("\t\t--help prints this message. \n");
                 System.out.println("\t\t--license prints license. \n");
