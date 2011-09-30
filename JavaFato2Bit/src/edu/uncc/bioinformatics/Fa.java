@@ -23,7 +23,8 @@ import java.nio.CharBuffer;
 
 public class Fa {
 
-	
+	private static CharBuffer buff = CharBuffer.allocate( 10000000);
+        
 	/* Read in DNA or Peptide FA record in mixed case.   Allow any upper or lower case
 	 * letter, or the dash character in.
 	 * 
@@ -47,7 +48,7 @@ public class Fa {
 		    return false;
 		}
 		if (line.charAt(0) == '>'){
-		    name = line.substring(1).replaceAll(" ", "");
+		    name = line.substring(1).split(" ")[0]; //.substring(1).replaceAll(" ", "");
 		    if (line.equals("") ){
 		        System.err.println("Expecting sequence name after '>' " + f.getFile().getName());
 		    	throw new FaFormatException();
@@ -57,7 +58,7 @@ public class Fa {
 		    throw new FaFormatException();
 		}
 		/* Read until next '>' */
-		CharBuffer buff = CharBuffer.allocate( 10000000);
+		
 		for (;;){
 		    if ( (line = f.lineFileNext()) == null ) //!lineFileNext(lf, &line, &lineSize)
 		        break;
@@ -87,7 +88,7 @@ public class Fa {
 		//if (bufIx == 0){
 		//    System.err.println("Invalid fasta format: sequence size == 0 for element " + name);
 		//}
-	
+                buff.clear();
 		return true;
 	}
 

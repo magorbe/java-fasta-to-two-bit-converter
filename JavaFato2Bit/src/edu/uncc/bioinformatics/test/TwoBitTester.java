@@ -33,7 +33,7 @@ import edu.uncc.bioinformatics.DnaUtil;
 import edu.uncc.bioinformatics.DuplicateSequenceException;
 import edu.uncc.bioinformatics.FaFormatException;
 import edu.uncc.bioinformatics.Fast2BitCompare;
-import edu.uncc.bioinformatics.Fasto2Bit;
+import edu.uncc.bioinformatics.Fa2Bit;
 import edu.uncc.bioinformatics.twobit.FileSizeExceedsTwoBitStandardException;
 import edu.uncc.bioinformatics.twobit.TwoBitNameTooLongException;
 
@@ -51,7 +51,9 @@ public class TwoBitTester extends TestCase {
 		
 		long start = System.currentTimeMillis();
 		try {
-			Fasto2Bit.Fastto2BitConvert( Input , Output);
+			
+			Fa2Bit.Fastto2BitConvert( Input ,Output, false);
+			
 		} catch (FileSizeExceedsTwoBitStandardException e) {
 			e.printStackTrace();
 			fail("Exception");

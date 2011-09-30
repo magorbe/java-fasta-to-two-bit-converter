@@ -16,7 +16,7 @@ package edu.uncc.bioinformatics;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     This program was a conversion from C languge.  The original code is from 
-    http://code.google.com/p/zinba/
+    http://code.google.com/p/zinba/ 
 **/
 
 public class DnaSeq {
