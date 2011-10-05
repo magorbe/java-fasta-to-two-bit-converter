@@ -49,4 +49,5 @@ public class DnaSeq {
 	public int size(){
 		return Dna.length;
 	}
+	
 }

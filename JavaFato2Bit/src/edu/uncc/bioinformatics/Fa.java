@@ -23,14 +23,25 @@ import java.nio.CharBuffer;
 
 public class Fa {
 
-	private static CharBuffer buff = CharBuffer.allocate( 10000000);
+	public static int BUFF_SIZE = 250 * 1024 * 1024 ;
+	private  CharBuffer buff;
         
+	public void  invalidateBuffer(){
+		buff = null;
+	}
+	public void setBuffer() {
+		 buff = CharBuffer.allocate(  BUFF_SIZE );
+	}
+	
+	public Fa(){
+		buff = CharBuffer.allocate(  BUFF_SIZE );
+	}
 	/* Read in DNA or Peptide FA record in mixed case.   Allow any upper or lower case
 	 * letter, or the dash character in.
 	 * 
 	 * boolean faMixedSpeedReadNext(struct lineFile *lf, DNA **retDna, int *retSize, char **retName)
 	 * */
-	public static boolean faMixedSpeedReadNext( LineFile f, DnaSeq seq ) throws IOException, FaFormatException{
+	public boolean faMixedSpeedReadNext( LineFile f, DnaSeq seq ) throws IOException, FaFormatException{
 		char c;
 		int bufIx = 0;
 		String name = null; //the name of teh fa sequence.
@@ -91,5 +102,6 @@ public class Fa {
                 buff.clear();
 		return true;
 	}
+
 
 }
