@@ -54,7 +54,7 @@ public class Fa2Bit {
 		}
 		String[] Input = null;
 		String Output = null;
-                boolean Validate;
+                boolean Validate = false;
                 //this false does translate soft and hard masked values.
                 boolean NoMasked = false;
 		for( int i = 0 ; i < args.length ; i++){
@@ -107,14 +107,14 @@ public class Fa2Bit {
 		} catch (DuplicateSequenceException e) {
 			e.printStackTrace();
 		}
-		
-                File out = new File( Output);
-                
-                boolean result = Fast2BitCompare.validate( Input, "file://" + out.getAbsolutePath() );
-                if( !result ){
-                    System.out.println("Test failed" );   
-                }
-		
+		if( Validate ){
+	        File out = new File( Output );
+	        Fast2BitCompare comp = new Fast2BitCompare();
+	        boolean result = comp.validate( Input, "file://" + out.getAbsolutePath() );
+	        if( !result ){
+	            System.out.println("Test failed" );   
+	        }
+		}
 	}
 	
 	public static void printUsage(){
@@ -168,7 +168,7 @@ public class Fa2Bit {
 		//create class called twoBit
 		List<TwoBit> twoBitList = new ArrayList<TwoBit>();  //I will use a Java list instead of implementing a new link list.
 		TwoBit twoBit; 
-		Map<String, DnaSeq> uniqHash = new HashMap<String, DnaSeq>();
+		Map<String, String> uniqHash = new HashMap<String, String>();
 		//struct twoBit *twoBitList = NULL, *twoBit;
 		/**
 		 * I don't know what i is being used for
@@ -194,7 +194,8 @@ public class Fa2Bit {
 													 //TODO implement the lineFile class
 			DnaSeq seq = new DnaSeq(); //dnaSeq struct clone
 			System.out.println("Working on fa: " + fasta_file);
-			while( Fa.faMixedSpeedReadNext( lf, seq)){ // (faMixedSpeedReadNext(lf, &seq.dna, &seq.size, &seq.name)
+			Fa fa = new Fa();
+			while( fa.faMixedSpeedReadNext( lf, seq)){ // (faMixedSpeedReadNext(lf, &seq.dna, &seq.size, &seq.name)
 				if (seq.size() == 0)
 				{
 					System.err.println("Skipping item "+ seq.Name + " which has no sequence.\n");
@@ -218,7 +219,9 @@ public class Fa2Bit {
 						continue;
 					}
 				}
-				uniqHash.put(seq.getName(), seq);
+				/*This hash is only used to check for repetition of the sequence.  Therefore, I am only storing the 
+				 * string twice instead of storeing the sequence, which produces a HUGE memory leak.*/
+				uniqHash.put(seq.getName(), seq.getName() );
 				//hashAdd(uniqHash, seq.name, NULL);
 				if (noMaskFT){
 					seq.setDna( faToDna( seq.getDna()) );
@@ -231,6 +234,8 @@ public class Fa2Bit {
 			}
 			lf.close();
 		}
+		//free up the big buffer memory.
+		//Fa.invalidateBuffer();
 		//I don't know why we need to revers the list.  but here we go...
 		List<TwoBit> revers = new ArrayList<TwoBit>();
 		for( int k = twoBitList.size() - 1; k >= 0; k--){
