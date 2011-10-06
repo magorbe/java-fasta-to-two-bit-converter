@@ -27,8 +27,6 @@ public class Worker extends Thread{
     @Override
     public void run(){
     	try {
-    	
-            System.out.println("started ");
             long count = 0;
             
             TwoBit mine;
@@ -58,7 +56,7 @@ public class Worker extends Thread{
                     }else{
                     	
                         if( b.new_seq ){
-                        	System.out.println( num++ + " of " + total );
+                        	//System.out.println( num++ + " of " + total );
                         	if( b.getDone() ){
                         		System.out.println("Done");
                         		break;
@@ -94,7 +92,7 @@ public class Worker extends Thread{
                         
 
                         if( count++ % 100000000 == 0){
-                            System.out.println( this.getName() + "Sequence number " + count );
+                            System.out.print("."  );
                         }
                        
                         }
@@ -108,6 +106,7 @@ public class Worker extends Thread{
                 }
         
             }
+            System.out.println();
     	} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

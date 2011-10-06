@@ -89,11 +89,11 @@ public class Fa2Bit {
                     }
                     System.out.println("Output is null... setting the output file to " + Output );
                 }
-                if( NoMasked){
+                /*if( NoMasked){
                     System.out.println("Converting masked nucleotide to proper letter");
                 }else{
                     System.out.println("Converting masked nucleotide to n");
-                }
+                }*/
 		try {
 			Fastto2BitConvert( Input , Output, NoMasked);
 		} catch (FileSizeExceedsTwoBitStandardException e) {
