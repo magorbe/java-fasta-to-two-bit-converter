@@ -1,0 +1,14 @@
+# Introduction #
+
+This application is a Java port of the fato2bit converter included in zinba (http://code.google.com/p/zinba/). It can convert a list of fasta files into a single .2bit sequence file up to 2GB in size.
+
+
+# Details #
+
+To run the main executable:
+
+on the command line type:
+
+```
+java -jar Fa22BitConverter.jar --input /path/to/chromosome1.fasta@/path/to/chromosome2.fasta@/path/to/chromosoe3.fasta --output file.2bit
+```

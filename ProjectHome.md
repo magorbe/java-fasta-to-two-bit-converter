@@ -1,0 +1,1 @@
+The software is a port of BLAT's source code in C language to Java.

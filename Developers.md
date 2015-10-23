@@ -1,0 +1,14 @@
+# Notes for Developers #
+
+The project was created using Eclipse.
+
+The other executable included with the source is edu.uncc.bioinformatics.Fast2BitCompare.  This command works as follows:
+
+```
+
+java -classpath $libs_included_in_trunk:$project_classpath edu.uncc.bioinformatics.Fast2BitCompare /path/to/fasta1@/path/to/fasta2@/path/to/fasta3 twobit.2bit
+```
+
+The command will check the two files have equivalent data.
+
+There are other tests included with the source for validation.
